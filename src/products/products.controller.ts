@@ -17,12 +17,12 @@ import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 import { Request } from 'express';
 
 // Multer storage configuration
 const storageOptions = diskStorage({
-  destination: './uploads',
+  destination: join(__dirname, '..', '..', 'uploads'),
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     callback(null, `${uniqueSuffix}${extname(file.originalname)}`);

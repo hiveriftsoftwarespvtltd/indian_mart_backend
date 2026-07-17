@@ -12,7 +12,7 @@ export class Product extends Document {
   @Prop({ default: 'Indoor/Outdoor' })
   type: string;
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   image: string;
 
   @Prop({ type: [String], default: [] })

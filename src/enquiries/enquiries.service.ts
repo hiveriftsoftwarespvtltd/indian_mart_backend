@@ -40,10 +40,12 @@ export class EnquiriesService {
     const created = new this.enquiryModel(createDto);
     const saved = await created.save();
 
-    // Send email notification in the background
+    // Email notification disabled per user request (WhatsApp handling is done on frontend)
+    /*
     this.sendNotificationEmail(saved).catch((err) => {
       console.error('[EnquiriesService] Background notification email failed:', err);
     });
+    */
 
     return saved;
   }

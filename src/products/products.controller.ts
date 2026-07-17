@@ -12,6 +12,7 @@ import {
   UploadedFile,
   UploadedFiles,
   Req,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -54,47 +55,56 @@ export class ProductsController {
     @UploadedFiles() files: { image?: any[], images?: any[] },
     @Req() req: Request,
   ) {
-    const host = req.get('host');
-    const protocol = req.protocol;
+    try {
+      const host = req.get('host');
+      const protocol = req.protocol;
 
-    let imageUrl = body.image || '';
-    if (files?.image?.[0]) {
-      imageUrl = `${protocol}://${host}/uploads/${files.image[0].filename}`;
-    }
+      let imageUrl = body.image || '';
+      if (files?.image?.[0]) {
+        imageUrl = `${protocol}://${host}/uploads/${files.image[0].filename}`;
+      }
 
-    let galleryUrls: string[] = [];
-    if (files?.images) {
-      galleryUrls = files.images.map(f => `${protocol}://${host}/uploads/${f.filename}`);
-    } else if (body.images) {
-      if (typeof body.images === 'string') {
-        try {
-          galleryUrls = JSON.parse(body.images);
-        } catch (e) {
-          galleryUrls = body.images.split(',').map((u) => u.trim()).filter(Boolean);
+      let galleryUrls: string[] = [];
+      if (files?.images) {
+        galleryUrls = files.images.map(f => `${protocol}://${host}/uploads/${f.filename}`);
+      } else if (body.images) {
+        if (typeof body.images === 'string') {
+          try {
+            galleryUrls = JSON.parse(body.images);
+          } catch (e) {
+            galleryUrls = body.images.split(',').map((u) => u.trim()).filter(Boolean);
+          }
+        } else {
+          galleryUrls = body.images;
         }
-      } else {
-        galleryUrls = body.images;
       }
-    }
 
-    let tagsArray = body.tags || [];
-    if (typeof tagsArray === 'string') {
-      try {
-        tagsArray = JSON.parse(tagsArray);
-      } catch (e) {
-        tagsArray = tagsArray.split(',').map((t) => t.trim()).filter(Boolean);
+      let tagsArray = body.tags || [];
+      if (typeof tagsArray === 'string') {
+        try {
+          tagsArray = JSON.parse(tagsArray);
+        } catch (e) {
+          tagsArray = tagsArray.split(',').map((t) => t.trim()).filter(Boolean);
+        }
       }
-    }
 
-    return this.productsService.create({
-      title: body.title,
-      material: body.material,
-      type: body.type,
-      image: imageUrl,
-      images: galleryUrls,
-      tags: tagsArray,
-      category: body.category || '',
-    });
+      return await this.productsService.create({
+        title: body.title,
+        material: body.material,
+        type: body.type,
+        image: imageUrl,
+        images: galleryUrls,
+        tags: tagsArray,
+        category: body.category || '',
+      });
+    } catch (error) {
+      console.error('[ProductsController] Error creating product:', error);
+      throw new InternalServerErrorException({
+        message: error.message,
+        stack: error.stack,
+        details: error,
+      });
+    }
   }
 
   @Put(':id')
@@ -109,52 +119,61 @@ export class ProductsController {
     @UploadedFiles() files: { image?: any[], images?: any[] },
     @Req() req: Request,
   ) {
-    const host = req.get('host');
-    const protocol = req.protocol;
+    try {
+      const host = req.get('host');
+      const protocol = req.protocol;
 
-    const updateData: any = {
-      title: body.title,
-      material: body.material,
-      type: body.type,
-      category: body.category,
-    };
+      const updateData: any = {
+        title: body.title,
+        material: body.material,
+        type: body.type,
+        category: body.category,
+      };
 
-    if (files?.image?.[0]) {
-      updateData.image = `${protocol}://${host}/uploads/${files.image[0].filename}`;
-    } else if (body.image) {
-      updateData.image = body.image;
-    }
-
-    let galleryUrls: string[] = [];
-    if (files?.images) {
-      galleryUrls = files.images.map(f => `${protocol}://${host}/uploads/${f.filename}`);
-      updateData.images = galleryUrls;
-    } else if (body.images) {
-      if (typeof body.images === 'string') {
-        try {
-          galleryUrls = JSON.parse(body.images);
-        } catch (e) {
-          galleryUrls = body.images.split(',').map((u) => u.trim()).filter(Boolean);
-        }
-      } else {
-        galleryUrls = body.images;
+      if (files?.image?.[0]) {
+        updateData.image = `${protocol}://${host}/uploads/${files.image[0].filename}`;
+      } else if (body.image) {
+        updateData.image = body.image;
       }
-      updateData.images = galleryUrls;
-    }
 
-    if (body.tags) {
-      let tagsArray = body.tags;
-      if (typeof tagsArray === 'string') {
-        try {
-          tagsArray = JSON.parse(tagsArray);
-        } catch (e) {
-          tagsArray = tagsArray.split(',').map((t) => t.trim()).filter(Boolean);
+      let galleryUrls: string[] = [];
+      if (files?.images) {
+        galleryUrls = files.images.map(f => `${protocol}://${host}/uploads/${f.filename}`);
+        updateData.images = galleryUrls;
+      } else if (body.images) {
+        if (typeof body.images === 'string') {
+          try {
+            galleryUrls = JSON.parse(body.images);
+          } catch (e) {
+            galleryUrls = body.images.split(',').map((u) => u.trim()).filter(Boolean);
+          }
+        } else {
+          galleryUrls = body.images;
         }
+        updateData.images = galleryUrls;
       }
-      updateData.tags = tagsArray;
-    }
 
-    return this.productsService.update(id, updateData);
+      if (body.tags) {
+        let tagsArray = body.tags;
+        if (typeof tagsArray === 'string') {
+          try {
+            tagsArray = JSON.parse(tagsArray);
+          } catch (e) {
+            tagsArray = tagsArray.split(',').map((t) => t.trim()).filter(Boolean);
+          }
+        }
+        updateData.tags = tagsArray;
+      }
+
+      return await this.productsService.update(id, updateData);
+    } catch (error) {
+      console.error('[ProductsController] Error updating product:', error);
+      throw new InternalServerErrorException({
+        message: error.message,
+        stack: error.stack,
+        details: error,
+      });
+    }
   }
 
   @Delete(':id')

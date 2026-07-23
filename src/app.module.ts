@@ -11,6 +11,7 @@ import { BannersModule } from './banners/banners.module';
 import { ContentModule } from './content/content.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { ClientsModule } from './clients/clients.module';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ClientsModule } from './clients/clients.module';
     ContentModule,
     GalleryModule,
     ClientsModule,
+    ProjectsModule,
 
     
     

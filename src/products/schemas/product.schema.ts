@@ -6,6 +6,9 @@ export class Product extends Document {
   @Prop({ required: true })
   title: string;
 
+  @Prop({ default: '' })
+  description: string;
+
   @Prop({ default: 'FRP' })
   material: string;
 
@@ -23,6 +26,18 @@ export class Product extends Document {
 
   @Prop({ default: '' })
   category: string;
+
+  @Prop({ default: 'Marble Dust White, Gold Leaf, Antique Bronze' })
+  finish: string;
+
+  @Prop({ default: '2 ft to 12 ft' })
+  sizes: string;
+
+  @Prop({ default: 'Indian Dhamma Art' })
+  brand: string;
+
+  @Prop({ default: 'Yes (Rain & UV Resistant)' })
+  weatherproof: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

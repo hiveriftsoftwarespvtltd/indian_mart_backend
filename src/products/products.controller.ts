@@ -90,12 +90,17 @@ export class ProductsController {
 
       return await this.productsService.create({
         title: body.title,
+        description: body.description || '',
         material: body.material,
         type: body.type,
         image: imageUrl,
         images: galleryUrls,
         tags: tagsArray,
         category: body.category || '',
+        finish: body.finish !== undefined ? body.finish : 'Marble Dust White, Gold Leaf, Antique Bronze',
+        sizes: body.sizes !== undefined ? body.sizes : '2 ft to 12 ft',
+        brand: body.brand !== undefined ? body.brand : 'Indian Dhamma Art',
+        weatherproof: body.weatherproof !== undefined ? body.weatherproof : 'Yes (Rain & UV Resistant)',
       });
     } catch (error) {
       console.error('[ProductsController] Error creating product:', error);
@@ -129,6 +134,12 @@ export class ProductsController {
         type: body.type,
         category: body.category,
       };
+
+      if (body.description !== undefined) updateData.description = body.description;
+      if (body.finish !== undefined) updateData.finish = body.finish;
+      if (body.sizes !== undefined) updateData.sizes = body.sizes;
+      if (body.brand !== undefined) updateData.brand = body.brand;
+      if (body.weatherproof !== undefined) updateData.weatherproof = body.weatherproof;
 
       if (files?.image?.[0]) {
         updateData.image = `${protocol}://${host}/uploads/${files.image[0].filename}`;

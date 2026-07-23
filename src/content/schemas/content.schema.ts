@@ -26,6 +26,9 @@ export class Content extends Document {
       'Every piece we create is the result of devotion, patience and perfection. Our skilled artisans combine age-old techniques with modern design, ensuring every sculpture we deliver is a masterpiece.',
   })
   storyText2: string;
+
+  @Prop({ type: Array, default: [] })
+  projects: Array<any>;
 }
 
 export const ContentSchema = SchemaFactory.createForClass(Content);
